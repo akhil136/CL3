@@ -1,0 +1,73 @@
+b2.py
+
+
+from flask import Flask , request, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def fun():
+    return render_template('index.html',msg="")
+    
+@app.route('/check/',methods=['POST','GET'])
+def check():
+    a = checker(request.form['string'])
+    return render_template('index.html',msg=a)
+
+def checker(input_document):
+    knowledge_base=""
+    with open('data.txt','rt') as f:
+        knowledge_base = f.read()
+    
+    # remove unwanted characters from both strings
+    unwanted_chars = ":?.-!_/\,;"
+    for char in unwanted_chars:
+        knowledge_base = knowledge_base.replace(char,"")
+        input_document = input_document.replace(char,"")
+
+    a = knowledge_base.split()
+    b = input_document.split()
+
+    copy_count = 0
+
+    for i in b:
+        if i in a:
+            copy_count = copy_count + 1
+                
+    print "copy_count = ", copy_count
+    print "len b = ", len(b)
+    percentage = str(float(copy_count)/len(b)*100.0) + "%"                
+    return percentage
+
+if __name__=="__main__":
+    app.run()
+
+
+
+data.txt
+
+
+Use Divide and Conquer Strategies and object-oriented software design technique using Modelio to design software function for Binary Search for an un-ordered data stored in memory.
+Use necessary USE-CASE diagrams and justify its use with the help of mathematical modeling and related efficiency such as space and time complexity. Give the design with class and sequence diagrams.
+Implement the design using Eclipse C++ or Python.
+
+
+
+
+index.html
+
+
+<html>
+
+<h1>Plagirism checker</h1>
+
+{{ msg }}
+
+<body>
+<form action="/check/" method="POST">
+Enter string: <input type="text" name="string">
+<input type="submit" value="Check it">
+</form>
+</body>
+</html>
+

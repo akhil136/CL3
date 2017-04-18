@@ -1,0 +1,404 @@
+main_activity.java
+
+
+package com.example.prasad.sa5;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    EditText etNum1;
+    EditText etNum2;
+    TextView tvAns;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        (findViewById(R.id.btnSin)).setOnClickListener(this);
+        (findViewById(R.id.btnCos)).setOnClickListener(this);
+        (findViewById(R.id.btnTan)).setOnClickListener(this);
+        (findViewById(R.id.btnSqrt)).setOnClickListener(this);
+        (findViewById(R.id.btnRead)).setOnClickListener(this);
+
+        (findViewById(R.id.btnAdd)).setOnClickListener(this);
+        (findViewById(R.id.btnSub)).setOnClickListener(this);
+        (findViewById(R.id.btnMul)).setOnClickListener(this);
+        (findViewById(R.id.btnDiv)).setOnClickListener(this);
+
+
+        etNum1 = (EditText) findViewById(R.id.etNum1);
+        etNum2 = (EditText) findViewById(R.id.etNum2);
+        tvAns = (TextView) findViewById(R.id.tvAns);
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    0);
+
+        }
+
+    }
+
+    // dont call roundThree for b3
+    // means - just to return Math.sin(......
+    // return a-b etc
+    // b3 requires some extended floating point arithmatic, we are not rounding doubles in b3
+    // rest of the code remains same. skip file reading code in b3. take input from user.
+
+    public static double getSin(double s) {
+        return roundThree(Math.sin(Math.toRadians(s)));
+    }
+
+    public static double getCos(double s) {
+        return roundThree(Math.cos(Math.toRadians(s)));
+
+    }
+
+    public static double getTan(double s) {
+        return roundThree(Math.tan(Math.toRadians(s)));
+    }
+
+    public static double getSqrt(double s) {
+        return roundThree(Math.sqrt(s));
+    }
+
+    public static double add(double a, double b) {
+        return roundThree(a + b);
+
+    }
+
+    public static double sub(double a, double b) {
+        return roundThree(a - b);
+
+    }
+
+    public static double mul(double a, double b) {
+        return roundThree(a * b);
+
+    }
+
+    public static double div(double a, double b) {
+        return roundThree(a / b);
+    }
+
+    public static double roundThree(double val) {
+        val = (int)(val*1000);
+        return val/1000;
+    }
+
+    @Override
+    public void onClick(View view) {
+        Button btn = (Button) view;
+
+        try {
+            switch (btn.getText().toString()) {
+                case "Read Input":
+                    readInput();
+                    break;
+
+                case "SIN":
+                    tvAns.setText(btn.getText().toString() + " " + getSin(Double.parseDouble(etNum1.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+
+                case "COS":
+                    tvAns.setText(btn.getText().toString() + " " + getCos(Double.parseDouble(etNum1.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+
+
+                case "TAN":
+                    tvAns.setText(btn.getText().toString() + " " + getTan(Double.parseDouble(etNum1.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+
+                case "SQRT":
+                    tvAns.setText(btn.getText().toString() + " " + getSqrt(Double.parseDouble(etNum1.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+
+                case "Add":
+                    tvAns.setText("" + add(Double.parseDouble(etNum1.getText().toString()), Double.parseDouble(etNum2.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+
+                case "Sub":
+                    tvAns.setText("" + sub(Double.parseDouble(etNum1.getText().toString()), Double.parseDouble(etNum2.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+
+                case "Mul":
+                    tvAns.setText("" + mul(Double.parseDouble(etNum1.getText().toString()), Double.parseDouble(etNum2.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+
+                case "Div":
+                    Log.w("CAPPP",etNum2.getText().toString());
+                    String dd=etNum2.getText().toString();
+                    if (dd.equals("0"))
+                    {
+                        tvAns.setText("Cannot divide by zero");
+                        Log.w("CAPPP22","Cannot divide by zero");
+
+                    }
+                    else
+                        tvAns.setText("" + div(Double.parseDouble(etNum1.getText().toString()), Double.parseDouble(etNum2.getText().toString())));
+                    etNum1.setText("");
+                    etNum2.setText("");
+                    break;
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
+    private void readInput() {
+        try {
+            File file = new File("/storage/emulated/0/input.xml");
+
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+
+            String s;
+
+            while ((s = bufferedReader.readLine()) != null) {
+                if (s.contains("items"))
+                    continue;
+
+                if (!s.contains("item"))
+                    continue;
+
+                if (s.contains("item")) {
+                    String input = s.split(">")[1].split("<")[0];
+
+                    if (etNum1.getText().length() == 0) {
+                        etNum1.setText(input);
+                    } else {
+                        etNum2.setText(input);
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+}
+
+
+
+
+manifext.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.prasad.sa5">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+
+
+
+main_activity.xml
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.prasad.sa5.MainActivity">
+
+    <TextView
+        android:id="@+id/tvAns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp" />
+
+
+    <EditText
+        android:id="@+id/etNum1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvAns"
+        android:layout_marginTop="10dp"
+        android:inputType="number"
+        android:hint="Num1" />
+
+    <EditText
+        android:id="@+id/etNum2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etNum1"
+        android:layout_marginTop="10dp"
+        android:inputType="number"
+        android:hint="Num2" />
+
+    <Button
+        android:id="@+id/btnRead"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/etNum2"
+        android:text="Read Input" />
+
+    <LinearLayout
+        android:id="@+id/llScie"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnRead"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnSin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SIN" />
+
+        <Button
+            android:id="@+id/btnCos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="COS" />
+
+        <Button
+            android:id="@+id/btnTan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TAN" />
+
+        <Button
+            android:id="@+id/btnSqrt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SQRT" />
+
+    </LinearLayout>
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/llScie"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add" />
+
+        <Button
+            android:id="@+id/btnSub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sub" />
+
+        <Button
+            android:id="@+id/btnMul"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mul" />
+
+        <Button
+            android:id="@+id/btnDiv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Div" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>
+
+
+
+
+
+test.java
+
+
+
+package com.example.prasad.sa5;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+public class ExampleUnitTest {
+    @Test
+    public void sin_isCorrect() throws Exception{
+        assertEquals(1, MainActivity.getSin(90),0.1);
+    }
+
+    @Test
+    public void cos_isCorrect() throws Exception{
+        assertEquals(0.5, MainActivity.getCos(60),0.1);
+    }
+
+    @Test
+    public void tan_isCorrect() throws Exception{
+        assertEquals(1, MainActivity.getTan(45),0.1);
+    }
+
+    @Test
+    public void sqrt_isCorrect() throws Exception{
+        assertEquals(1.414, MainActivity.getSqrt(2),0.1);
+    }
+}
